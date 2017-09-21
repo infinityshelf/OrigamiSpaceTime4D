@@ -14,18 +14,18 @@ enum STATES {
 
 var walk_speed = 15
 var positions
-#var transforms
+
+var curve
 
 var state = STATES.UNDEFINED
 
 func _ready():
-	# Called every time the node is added to the scene.
-	# Initialization here
 	set_fixed_process(true)
 	set_process_input(true)
 	positions = Vector3Array()
-	#transforms = TransformArray()
+
 	state = STATES.RECORDING
+
 	pass
 
 func _fixed_process(delta):
@@ -54,6 +54,16 @@ func play():
 		get_node("/root/World").frame_time = 0
 		#print("out of positions!")
 		#get_tree().quit()
+	var path = get_node("/root/World/path")
+	path.clear()
+	#path.begin(Mesh.PRIMITIVE_POINTS, null)
+	#path.add_vertex(positions[0])
+	#path.add_vertex(positions[positions.size()-1])
+	#path.end()
+	path.begin(Mesh.PRIMITIVE_LINE_STRIP, null)
+	for point in positions:
+		path.add_vertex(point)
+	path.end()
 	pass
 
 func record(delta):
@@ -85,6 +95,8 @@ func record(delta):
 		right = right.normalized()
 		move(right * walk_speed * delta)
 	positions.append(get_global_transform().origin)
+	#curve.add_point(get_global_transform().origin)
+	#nav_mesh.get_navigation_mesh().set_vertices(positions)
 	
 func scrub():
 	pass
