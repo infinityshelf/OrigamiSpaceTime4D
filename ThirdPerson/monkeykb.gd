@@ -13,11 +13,13 @@ var left
 var right
 var jump
 
-const WALK_SPEED = 3
+const WALK_SPEED = 5
 const GRAVITY = 25
 
 const debug = true
 var physicsLabel
+
+onready var multi = get_node("../MultiMeshInstance")
 
 func _ready():
 	# Called every time the node is added to the scene.
@@ -33,6 +35,10 @@ func _ready():
 	right = false
 	jump = false
 	
+	multi.set_multimesh(MultiMesh.new())
+	multi.get_multimesh().set_mesh(get_node("MonkeyMesh").get_mesh())
+	multi.get_multimesh().set_instance_count(10)
+	multi.get_multimesh().set_instance_transform(0, Transform(Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0)))
 	if debug:
 		physicsLabel = Label.new()
 		physicsLabel.set_global_pos(Vector2(0,20))
@@ -47,7 +53,7 @@ func _fixed_process(delta):
 	dir.y = 0 # blank out y
 	dir = dir.normalized() #normalize it
 	# add gravity
-	print("atan2(dir.x, dir.x): ", atan2(dir.x, dir.z))
+	#print("atan2(dir.x, dir.x): ", atan2(dir.x, dir.z))
 	#get_node("MonkeyMesh").set_rotation(Vector3(0,atan2(dir.x,dir.z),0))
 	velocity.y -= GRAVITY * delta
 	
