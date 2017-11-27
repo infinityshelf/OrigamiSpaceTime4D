@@ -36,4 +36,5 @@ func _input(event):
 			set_translation(Vector3(0,0,-.5) + translation)
 
 func _fixed_process(delta):
+	look_at(get_parent().get_parent().get_parent().get_translation(),Vector3(0,1,0))
 	pass

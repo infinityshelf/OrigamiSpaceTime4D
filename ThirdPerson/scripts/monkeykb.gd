@@ -12,6 +12,7 @@ var down
 var left
 var right
 var jump
+var canJump = false
 
 const WALK_SPEED = 5
 const GRAVITY = 25
@@ -22,12 +23,10 @@ var physicsLabel
 onready var multi = get_node("../MultiMeshInstance")
 
 func _ready():
-	# Called every time the node is added to the scene.
-	# Initialization here
-	velocity = Vector3(0,0,0)
-#	inputVector = Vector3(0,0,0)
 	set_fixed_process(true)
 	set_process_input(true)
+	
+	velocity = Vector3(0,0,0)
 	
 	up = false
 	left = false
@@ -47,14 +46,17 @@ func _ready():
 
 func _fixed_process(delta):
 	
+	if up || left || right || down:
+		var mesh = 	get_node("MonkeyMesh")
+		var rotation_vector = Vector3(0,atan2(velocity.x,velocity.z),0)
+		mesh.set_rotation(rotation_vector)
+	
 	var cameraFront = get_node("OuterGimball/InnerGimball/Camera/Front")
 	var dir = cameraFront.get_global_transform().origin - get_global_transform().origin
 	dir *= 100 # for extreme camera angles
 	dir.y = 0 # blank out y
 	dir = dir.normalized() #normalize it
-	# add gravity
-	#print("atan2(dir.x, dir.x): ", atan2(dir.x, dir.z))
-	#get_node("MonkeyMesh").set_rotation(Vector3(0,atan2(dir.x,dir.z),0))
+	
 	velocity.y -= GRAVITY * delta
 	
 	velocity.z = 0
@@ -76,12 +78,13 @@ func _fixed_process(delta):
 	if right:
 		velocity.x += dir.z
 		velocity.z += -dir.x
-	if jump:
-		velocity.y = 10
-	if up || left || right || down:
-		var mesh = 	get_node("MonkeyMesh")
-		var rotation_vector = Vector3(0,atan2(velocity.x,velocity.z),0)
-		mesh.set_rotation(rotation_vector)
+	if jump && canJump:
+		velocity.y = 15
+		jump = false
+#	if up || left || right || down:
+#		var mesh = 	get_node("MonkeyMesh")
+#		var rotation_vector = Vector3(0,atan2(velocity.x,velocity.z),0)
+#		mesh.set_rotation(rotation_vector)
 	
 	var normalized_velocity = velocity.normalized()
 	# this is so you don't move faster when going diagonal
@@ -101,16 +104,20 @@ func _fixed_process(delta):
 	
 	# check if colliding, and slide along ground normal if so
 	if (is_colliding()):
+		canJump = true
 		var normal = get_collision_normal()
 		motion = normal.slide(motion)
 		velocity = normal.slide(velocity)
 		move(motion)
+	else:
+		canJump = false
 		
 	if debug:
 		print_physics()
 
 
 func _input(event):
+	jump = false
 	if event.is_action("up"):
 		up = event.is_action_pressed("up") || !event.is_action_released("up")
 	if event.is_action("left"):
@@ -119,8 +126,9 @@ func _input(event):
         right = event.is_action_pressed("right") || !event.is_action_released("right")
 	if event.is_action("down"):
         down = event.is_action_pressed("down") || !event.is_action_released("down")	
-	if event.is_action("jump"):
-		jump = event.is_action_pressed("jump") || !event.is_action_released("jump")
+	if event.is_action_pressed("jump"):
+		jump = true
+		pass
 	pass
 	
 func print_physics():

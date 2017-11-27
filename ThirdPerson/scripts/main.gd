@@ -20,5 +20,5 @@ func _input(event):
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			
 func _process(delta):
-	get_node("FPS Label").set_text("FPS: " + String(delta * 60 * 60))
+	get_node("FPS Label").set_text("FPS: " + String(delta))
 	pass
