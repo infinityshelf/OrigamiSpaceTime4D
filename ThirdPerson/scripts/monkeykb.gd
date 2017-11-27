@@ -14,13 +14,18 @@ var right
 var jump
 var canJump = false
 
-const WALK_SPEED = 5
-const GRAVITY = 25
+const WALK_SPEED = 10
+const GRAVITY = 15
+const JUMP_SPEED = 10
 
 const debug = true
 var physicsLabel
 
-onready var multi = get_node("../MultiMeshInstance")
+export(NodePath) var MonkeyMeshPath
+onready var monkeyMesh = get_node(MonkeyMeshPath)
+
+export(NodePath) var CameraFrontPath
+onready var cameraFront = get_node(CameraFrontPath)
 
 func _ready():
 	set_fixed_process(true)
@@ -34,10 +39,6 @@ func _ready():
 	right = false
 	jump = false
 	
-	multi.set_multimesh(MultiMesh.new())
-	multi.get_multimesh().set_mesh(get_node("MonkeyMesh").get_mesh())
-	multi.get_multimesh().set_instance_count(10)
-	multi.get_multimesh().set_instance_transform(0, Transform(Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0)))
 	if debug:
 		physicsLabel = Label.new()
 		physicsLabel.set_global_pos(Vector2(0,20))
@@ -45,15 +46,17 @@ func _ready():
 	pass
 
 func _fixed_process(delta):
+	up = Input.is_action_pressed("up")
+	down = Input.is_action_pressed("down")
+	left = Input.is_action_pressed("left")
+	right = Input.is_action_pressed("right")
 	
 	if up || left || right || down:
-		var mesh = 	get_node("MonkeyMesh")
 		var rotation_vector = Vector3(0,atan2(velocity.x,velocity.z),0)
-		mesh.set_rotation(rotation_vector)
+		monkeyMesh.set_rotation(rotation_vector)
 	
-	var cameraFront = get_node("OuterGimball/InnerGimball/Camera/Front")
 	var dir = cameraFront.get_global_transform().origin - get_global_transform().origin
-	dir *= 100 # for extreme camera angles
+	
 	dir.y = 0 # blank out y
 	dir = dir.normalized() #normalize it
 	
@@ -66,7 +69,6 @@ func _fixed_process(delta):
 		# up relative to cam
 		velocity.z += -dir.z
 		velocity.x += -dir.x
-		#get_node("MonkeyMesh").set_rotation(Vector3(0,atan2(velocity.x,velocity.z),0))
 	if down:
 		# down relative to cam
 		velocity.z += dir.z
@@ -79,12 +81,8 @@ func _fixed_process(delta):
 		velocity.x += dir.z
 		velocity.z += -dir.x
 	if jump && canJump:
-		velocity.y = 15
+		velocity.y = JUMP_SPEED
 		jump = false
-#	if up || left || right || down:
-#		var mesh = 	get_node("MonkeyMesh")
-#		var rotation_vector = Vector3(0,atan2(velocity.x,velocity.z),0)
-#		mesh.set_rotation(rotation_vector)
 	
 	var normalized_velocity = velocity.normalized()
 	# this is so you don't move faster when going diagonal
@@ -118,15 +116,15 @@ func _fixed_process(delta):
 
 func _input(event):
 	jump = false
-	if event.is_action("up"):
-		up = event.is_action_pressed("up") || !event.is_action_released("up")
-	if event.is_action("left"):
-		left = event.is_action_pressed("left") || !event.is_action_released("left")
-	if event.is_action("right"):
-        right = event.is_action_pressed("right") || !event.is_action_released("right")
-	if event.is_action("down"):
-        down = event.is_action_pressed("down") || !event.is_action_released("down")	
-	if event.is_action_pressed("jump"):
+#	if event.is_action("up"):
+#		up = event.is_action_pressed("up") || !event.is_action_released("up")
+#	if event.is_action("left"):
+#		left = event.is_action_pressed("left") || !event.is_action_released("left")
+#	if event.is_action("right"):
+#        right = event.is_action_pressed("right") || !event.is_action_released("right")
+#	if event.is_action("down"):
+#        down = event.is_action_pressed("down") || !event.is_action_released("down")	
+	if event.is_action("jump") && event.is_action_pressed("jump"):
 		jump = true
 		pass
 	pass
