@@ -2,7 +2,7 @@ extends WorldEnvironment
 
 func _ready():
 	set_process_input(true)
-	set_process(true)
+	set_fixed_process(true)
 	var wasdLabel = get_node("Movement Label")
 	wasdLabel.set_pos(Vector2(0, get_viewport().get_rect().size.y - wasdLabel.get_line_height() * wasdLabel.get_line_count()))
 	wasdLabel.set_text("WASD or Arrows to move. ESC to quit. Enter to show mouse")
@@ -19,6 +19,6 @@ func _input(event):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			
-func _process(delta):
-	get_node("FPS Label").set_text("FPS: " + String(delta))
+func _fixed_process(delta):
+	get_node("FPS Label").set_text("FPS: " + String(1.0/delta))
 	pass

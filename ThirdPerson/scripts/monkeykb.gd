@@ -1,17 +1,11 @@
 extends KinematicBody
 
-# class member variables go here, for example:
-# var a = 2
-# var b = "textvar"
-
-var velocity
-#var inputVector
-
-var up
-var down
-var left
-var right
-var jump
+var velocity = Vector3()
+var up = false
+var down = false
+var left = false
+var right = false
+var jump = false
 var canJump = false
 
 const WALK_SPEED = 10
@@ -27,17 +21,12 @@ onready var monkeyMesh = get_node(MonkeyMeshPath)
 export(NodePath) var CameraFrontPath
 onready var cameraFront = get_node(CameraFrontPath)
 
+export(NodePath) var ImmediateGeometryPath
+onready var immedeateGeometry = get_node(ImmediateGeometryPath)
+
 func _ready():
 	set_fixed_process(true)
 	set_process_input(true)
-	
-	velocity = Vector3(0,0,0)
-	
-	up = false
-	left = false
-	down = false
-	right = false
-	jump = false
 	
 	if debug:
 		physicsLabel = Label.new()
@@ -51,17 +40,24 @@ func _fixed_process(delta):
 	left = Input.is_action_pressed("left")
 	right = Input.is_action_pressed("right")
 	
+	#
+	# Rotate the monkey towards the direction that it is moving
+	#
 	if up || left || right || down:
 		var rotation_vector = Vector3(0,atan2(velocity.x,velocity.z),0)
 		monkeyMesh.set_rotation(rotation_vector)
 	
+	#
+	# dir = direction towards the camera front
+	#
 	var dir = cameraFront.get_global_transform().origin - get_global_transform().origin
-	
 	dir.y = 0 # blank out y
 	dir = dir.normalized() #normalize it
 	
+	#
+	# add gravity to velocity, reset other values
+	#
 	velocity.y -= GRAVITY * delta
-	
 	velocity.z = 0
 	velocity.x = 0
 	
@@ -74,17 +70,18 @@ func _fixed_process(delta):
 		velocity.z += dir.z
 		velocity.x += dir.x
 	if left:
-		# etc
+		# left relative to cam
 		velocity.x += -dir.z
 		velocity.z += dir.x
 	if right:
+		# right relative to cam
 		velocity.x += dir.z
 		velocity.z += -dir.x
 	if jump && canJump:
 		velocity.y = JUMP_SPEED
 		jump = false
 	
-	var normalized_velocity = velocity.normalized()
+	var normalized_velocity = Vector3(velocity.x, 0, velocity.z).normalized()
 	# this is so you don't move faster when going diagonal
 	velocity.x = normalized_velocity.x
 	velocity.z = normalized_velocity.z
@@ -112,18 +109,12 @@ func _fixed_process(delta):
 		
 	if debug:
 		print_physics()
+		
+	immedeateGeometry.add_point(get_global_transform().origin, monkeyMesh.get_rotation_deg().y)
 
 
 func _input(event):
 	jump = false
-#	if event.is_action("up"):
-#		up = event.is_action_pressed("up") || !event.is_action_released("up")
-#	if event.is_action("left"):
-#		left = event.is_action_pressed("left") || !event.is_action_released("left")
-#	if event.is_action("right"):
-#        right = event.is_action_pressed("right") || !event.is_action_released("right")
-#	if event.is_action("down"):
-#        down = event.is_action_pressed("down") || !event.is_action_released("down")	
 	if event.is_action("jump") && event.is_action_pressed("jump"):
 		jump = true
 		pass

@@ -1,0 +1,123 @@
+[gd_scene load_steps=2 format=1]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends Label
+
+# class member variables go here, for example:
+# var a = 2
+# var b = \"textvar\"
+
+export(NodePath) var pointAPath
+export(NodePath) var pointBPath
+
+onready var pointA = get_node(pointAPath)
+onready var pointB = get_node(pointBPath)
+
+onready var angle = 45
+
+func _ready():
+	# Called every time the node is added to the scene.
+	# Initialization here
+	set_process_input(true)
+	set_fixed_process(true)
+	pass
+
+func _fixed_process(delta):
+	if Input.is_action_pressed(\"ui_up\"):
+		angle += 1
+	if Input.is_action_pressed(\"ui_down\"):
+		angle -= 1
+	rotateA(angle)
+	
+func rotateA(angle):
+	var apos = pointA.get_pos()
+	var bpos = pointB.get_pos()
+	var a_minus_b = apos - bpos
+	
+	var cpos = Vector2()
+	
+	cpos.x = a_minus_b.x * cos(deg2rad(angle)) - a_minus_b.y * sin(deg2rad(angle))
+	cpos.y = a_minus_b.y * cos(deg2rad(angle)) + a_minus_b.x * sin(deg2rad(angle))
+	
+	cpos += bpos
+	
+	set_pos(cpos)
+	pass
+	
+func rotateB(angle):
+	var apos = pointA.get_pos() - pointB.get_pos()
+	apos = apos.rotated(deg2rad(angle))
+	apos += pointB.get_pos()
+	set_pos(apos)
+	pass"
+
+[node name="Node2D" type="Node2D"]
+
+[node name="A Laberl" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 64.0
+margin/top = 55.0
+margin/right = 125.0
+margin/bottom = 69.0
+text = "A = 64,55"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="B Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 73.0
+margin/top = 88.0
+margin/right = 134.0
+margin/bottom = 102.0
+text = "B = 73,88"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="C Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 176.0
+margin/top = 90.0
+margin/right = 231.0
+margin/bottom = 104.0
+text = "C"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+script/script = SubResource( 1 )
+pointAPath = NodePath("../A Laberl")
+pointBPath = NodePath("../B Label")
+
+[node name="Maths" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 275.0
+margin/top = 189.0
+margin/right = 476.0
+margin/bottom = 254.0
+text = "Rotating A around B 45 degrees
+
+
+"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+
